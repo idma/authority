@@ -2,8 +2,12 @@
 
 namespace Idma\Authority;
 
+use Illuminate\Contracts\Auth\Guard;
+
 class Authority
 {
+    protected $auth;
+
     /**
      * @type mixed Current user in the application for rules to apply to
      */
@@ -19,10 +23,14 @@ class Authority
      */
     protected $aliases = [];
 
-    public function __construct($user)
+    /**
+     * @param Guard $auth
+     */
+    public function __construct($auth)
     {
+        $this->auth = $auth;
         $this->rules = new RuleRepository();
-        $this->setCurrentUser($user);
+        $this->setCurrentUser($this->auth->user());
     }
 
     /**
@@ -228,5 +236,24 @@ class Authority
     public function user()
     {
         return $this->getCurrentUser();
+    }
+
+    /**
+     * Returns whether the current user is guest.
+     *
+     * @return bool
+     */
+    public function isGuest()
+    {
+        return \Auth::guest();
+    }
+
+    public function __call($name, $arguments)
+    {
+        if ($this->currentUser && method_exists($this->currentUser, $name)) {
+            return call_user_func_array([$this->currentUser, $name], $arguments);
+        }
+
+        return null;
     }
 }

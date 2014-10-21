@@ -21,7 +21,7 @@ class AuthorityServiceProvider extends ServiceProvider {
 		$this->package('idma/authority');
 
 		$this->app->singleton('idma.authority', function($app) {
-			$authority = new Authority($app['auth']->user());
+			$authority = new Authority($app['auth']);
 
 			$provisioners = $this->app['config']->get('authority::provisioners', null);
 
